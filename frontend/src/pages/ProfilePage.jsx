@@ -1,11 +1,25 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Mail, User } from "lucide-react";
-import { UploadButton } from "@uploadthing/react"; // Import UploadThing's UploadButton
+import { Mail, User, Camera } from "lucide-react";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(authUser.profilePic);
+
+  // 🔹 Handle File Upload Manually
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
+      const base64Image = reader.result; // Convert file to base64
+      setSelectedImg(base64Image); // Update UI with preview
+      await updateProfile({ profilePic: base64Image }); // Update user profile
+    };
+  };
 
   return (
     <div className="h-screen pt-20">
@@ -16,7 +30,7 @@ const ProfilePage = () => {
             <p className="mt-2">Your profile information</p>
           </div>
 
-          {/* Avatar upload section */}
+          {/* 🔹 Avatar Upload Section */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
@@ -24,26 +38,34 @@ const ProfilePage = () => {
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4"
               />
-              <div className="absolute bottom-0 right-0">
-                <UploadButton
-                  endpoint="imageUploader" // Use the endpoint from backend UploadThing setup
-                  onClientUploadComplete={(res) => {
-                    if (res && res[0]) {
-                      const imageUrl = res[0].url; // Get uploaded image URL
-                      setSelectedImg(imageUrl); // Set new profile pic
-                      updateProfile({ profilePic: imageUrl }); // Update in backend
-                    }
-                  }}
-                  onUploadError={(error) =>
-                    console.error("Upload error:", error)
+
+              {/* 🔹 Manual Upload (File Picker) */}
+              <label
+                htmlFor="avatar-upload"
+                className={`absolute bottom-0 right-0 
+                  bg-base-content hover:scale-105
+                  p-2 rounded-full cursor-pointer transition-all duration-200 
+                  ${
+                    isUpdatingProfile ? "animate-pulse pointer-events-none" : ""
                   }
+                `}
+              >
+                <Camera className="w-5 h-5 text-base-200" />
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isUpdatingProfile}
                 />
-              </div>
+              </label>
             </div>
+
             <p className="text-sm text-zinc-400">
               {isUpdatingProfile
                 ? "Uploading..."
-                : "Click the button to update your photo"}
+                : "Click the camera icon to update your photo"}
             </p>
           </div>
 
