@@ -25,6 +25,10 @@ app.use(
   })
 );
 
+// Increase request body size limit
+app.use(bodyParser.json({ limit: "10mb" })); // Increase to 10MB
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 

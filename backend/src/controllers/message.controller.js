@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
-import cloudinary from "../lib/cloudinary.js";
+// import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io, userSocketMap } from "../lib/socket.js";
+import { uploadImage } from "../lib/uploadThing.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -44,9 +45,14 @@ export const sendMessage = async (req, res) => {
 
     let imageUrl;
     if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+      // Upload image using UploadThing
+      const uploadRes = await uploadImage.onUploadComplete({
+        file: { url: image },
+      });
+
+      if (uploadRes && uploadRes.url) {
+        imageUrl = uploadRes.url; // Assign the uploaded image URL
+      }
     }
 
     const newMessage = new Message({
