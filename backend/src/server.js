@@ -8,9 +8,6 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { app, server } from "./lib/socket.js";
 
-// Import UploadThing logic
-import { uploadImage } from "./utils/uploadthing.js"; // Import UploadThing
-
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
